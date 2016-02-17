@@ -1,0 +1,27 @@
+{
+  "name": "clavish",
+  "version": "0.0.1",
+  "description": "Web MIDI API wrapper.",
+  "author": "Boian Tzonev",
+  "license": "Apache-2.0",
+  "main": "clavish.js",
+  "repository": {
+    "type": "git",
+    "url": "skip"
+  },
+  "keywords": [
+    "es6",
+    "babel"
+  ],
+  "devDependencies" : {
+    "webpack": "1.12.12",
+    "webpack-dev-server": "1.14.1",
+    "babel-core": "6.5.2",
+    "babel-loader": "6.2.2",
+    "babel-preset-es2015": "6.5.0"
+  },
+  "scripts": {
+    "build": "webpack --progress --colors",
+    "watch": "webpack-dev-server --progress --colors --content-base examples/"
+  }
+}
