@@ -1,4 +1,4 @@
-import { MidiDevice } from "./midi";
+import { MidiSpec, OutputDevice } from "./midi";
 
 const voices = {
   poly: 0x00,
@@ -18,147 +18,41 @@ const octaves = {
   1: 0x6E
 };
 
-export class VolcaKeys extends MidiDevice {
 
-  noteOff(channel, pitch, velocity = 0x00) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.validateRange(velocity, 0x00, 0x7F);
-    const status = velocity === 0x00 ? 0x09 : 0x08;
-    this.sendChannelMessage(channel, status, pitch, velocity);
-  }
+const volcaKeysMessageTypes = {
+  0x80: 'noteOff',
+  0x90: 'noteOn',
+  0xB0: 'controlChange',
+  0xE0: 'pitchBend',
+  0xF2: 'songPosition',
+  0xF8: 'clock',
+  0xFA: 'start',
+  0xFB: 'continue',
+  0xFC: 'stop',
+  0xFE: 'activeSensing'
+}
 
-  noteOn(channel, pitch, velocity) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.validateRange(velocity, 0x01, 0x7F);
-    this.sendChannelMessage(channel, 0x09, pitch, velocity);
-  }
+const volcaKeysControls = {
+  0x05: 'portamentoTime',
+  0x0B: 'expression',
+  0x28: 'voice',
+  0x29: 'octave',
+  0x2A: 'detune',
+  0x2B: 'vcoEgInt',
+  0x2C: 'cutoff',
+  0x2D: 'vcfEgInt',
+  0x2E: 'lfoRate',
+  0x2F: 'lfoPitchInt',
+  0x30: 'lfoCutoffInt',
+  0x31: 'egAttack',
+  0x32: 'egDecay',
+  0x33: 'egSustain',
+  0x34: 'delayTime',
+  0x35: 'delayFeedback'
+}
 
-  portamento(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x09, 0x05, value);
-  }
-
-  expression(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x0B, value);
-  }
-
-  voice(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.validateValueIn(value, voices);
-    this.sendChannelMessage(channel, 0x0B, 0x28, value);
-  }
-
-  octave(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.validateValueIn(value, octaves);
-    this.sendChannelMessage(channel, 0x0B, 0x29, value);
-  }
-
-  detune(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x2A, value);
-  }
-
-  vcoEgInt(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x2B, value);
-  }
-
-  cutoff(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x2C, value);
-  }
-
-  vcfEgInt(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x2D, value);
-  }
-
-  lfoRate(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x2E, value);
-  }
-
-  lfoPitchInt(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x2F, value);
-  }
-
-  lfoCutoffInt(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x30, value);
-  }
-
-  egAttack(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x31, value);
-  }
-
-  egDecay(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x32, value);
-  }
-
-  egSustain(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x33, value);
-  }
-
-  delayTime(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x34, value);
-  }
-
-  delayFeedback(channel, value) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0B, 0x35, value);
-  }
-
-  pitchBend(channel, low, high) {
-    this.validateRange(channel, 0x00, 0x0F);
-    this.sendChannelMessage(channel, 0x0E, low, high);
-  }
-
-  songPosition(step) {
-    this.validateRange(step, 0, 15);
-    this.sendMessage(0xF2, 0x00, step);
-  }
-
-  clockTime() {
-    this.sendMessage(0xF8, null, null);
-  }
-
-  clockStart() {
-    this.sendMessage(0xFA, null, null);
-  }
-
-  clockContinue() {
-    this.sendMessage(0xFB, null, null);
-  }
-
-  clockStop() {
-    this.sendMessage(0xFC, null, null);
-  }
-
-  activeSensing() {
-    this.sendMessage(0xFE, null, null);
-  }
-
-  validateRange(value, min, max) {
-    if (value < min || value > max) {
-      throw "Value outside of range.";
-    }
-  }
-
-  validateValueIn(value, obj) {
-    if (!value in obj) {
-      throw "Invalid value.";
-    }
-  }
-
-  sendChannelMessage(channel, status, data1, data2) {
-    const newStatus = status << 4 | channel;
-    this.sendMessage([newStatus, data1, data2]);
+export class VolcaKeys extends OutputDevice {
+  constructor(input, midiSpec=null) {
+    super(input, new MidiSpec(volcaKeysMessageTypes, volcaKeysControls));
   }
 }

@@ -13,6 +13,9 @@
     "es6",
     "babel"
   ],
+  "dependencies" : {
+    "babel-polyfill": "6.5.0"
+  },
   "devDependencies" : {
     "webpack": "1.12.12",
     "webpack-dev-server": "1.14.1",
